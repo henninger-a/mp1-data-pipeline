@@ -13,6 +13,7 @@ import logging
 import sys
 from pathlib import Path
 from data_loaders import load_data
+from data_processor import process_data, create_cleaning_report
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def setup_logging(verbose=False):
     """Configure logging for the pipeline."""
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s %(levelname)-8s %(message)s',
+        format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
         datefmt='%H:%M:%S'
     )
 
@@ -40,17 +41,16 @@ def parse_arguments():
                     '-i',
                     required=True,
                     help='Path to the input file')
+    
+    parser.add_argument('--config',
+                        required=True,
+                        choices=['yaml'],
+                        help='Path to the yaml cofiguration file')
 
     parser.add_argument('--output',
                     '-o',
                     required=True,
                     help='Path to the output file')
-
-    parser.add_argument('--format',
-                        required=False,
-                        choices=['csv', 'json'],
-                        default='csv',
-                        help='Output format: csv or json; default is csv')
 
     parser.add_argument('--verbose',
                         '-v',
