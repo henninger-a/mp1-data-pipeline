@@ -1,7 +1,6 @@
 # data_processor.py
 import logging
 import pandas as pd
-import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -33,45 +32,46 @@ def remove_outliers(df, columns, method, threshold):
     if method == 'iqr':
         for column in columns:
             if column not in df.columns:
-                logger.warning(f'column {column} not in data')
+                logger.warning(f'Column {column} not in data')
                 continue
-            if pd.api.types.is_numeric_dtype(column) is False:
-                logger.warning(f'column {column} is not numeric')
+            if pd.api.types.is_numeric_dtype(df[column]) is False:
+                logger.warning(f'Column {column} is not numeric')
                 continue
-        q1 = df[column].quantile(0.25)
-        q3 = df[column].quantile(0.75)
-        iqr = q3 - q1
-        lower = q1 - threshold * iqr
-        upper = q3 + threshold * iqr
-        df = df[(df["Score"] >= lower) & (df["Score"] <= upper)]
+            q1 = df[column].quantile(0.25)
+            q3 = df[column].quantile(0.75)
+            iqr = q3 - q1
+            lower = q1 - threshold * iqr
+            upper = q3 + threshold * iqr
+            df = df[(df["Score"] >= lower) & (df["Score"] <= upper)]
     if method == 'zscore':
         for column in columns:
             if column not in df.columns:
-                logger.warning(f'column {column} not in data')
+                logger.warning(f'Column {column} not in data')
                 continue
-            if pd.api.types.is_numeric_dtype(column) is False:
-                logger.warning(f'column {column} is not numeric')
+            if pd.api.types.is_numeric_dtype(df[column]) is False:
+                logger.warning(f'Column {column} is not numeric')
                 continue
             mean = df[column].mean()
             std = df[column].std()
             z_scores = []
-            for num in column:
-                df['z_scores'] ((num - mean) / std)
-        df = df[[abs(x) for x in z_scores] <= 3]
+            for num in df[column]:
+                z_scores.append((num - mean) / std)
+        df = df[pd.Series([abs(x) for x in z_scores]) <= 3]
+    else:
+        logger.error(f'Unsupported outlier method: {method}')
+        raise ValueError    
     logger.debug(f'Method: {method}, Threshold: {threshold}, Rows removed: {len(before) - len(df)}')
     return df
 
 
 def process_data(df, config):
     """Apply the processing steps enabled in the configuration."""
-    with open(config, "r") as f:
-        config = yaml.safe_load(f)
-    if config['processing']['remove_duplicates'] == 'true':
+    if config['processing']['remove_duplicates'] == True:
         df = remove_duplicates(df)
-    elif config['processing']['enabled'] == 'true':
-        df = handle_missing(df, config['processing']['axis'])
-    elif config['outliers']['enabled'] == 'true':
-        df = remove_outliers(df, config['outliers']['columns'], config['outliers']['method'], config['outliers']['threshold'])
+    if config['processing']['missing']['enabled'] == True:
+        df = handle_missing(df, config['processing']['missing']['axis'])
+    if config['processing']['outliers']['enabled'] == True:
+        df = remove_outliers(df, config['processing']['outliers']['columns'], config['processing']['outliers']['method'], config['processing']['outliers']['threshold'])
     return df
 
 
