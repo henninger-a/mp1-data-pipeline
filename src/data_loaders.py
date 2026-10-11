@@ -47,11 +47,11 @@ def load_data(filepath):
     """
     path = Path(filepath)
     if path.suffix == '.csv':
-        load_csv(path)
+        return load_csv(path)
     elif path.suffix == '.json':
-        load_json(path)
+        return load_json(path)
     elif path.suffix == '.yaml':
-        load_yaml(path)
+        return load_yaml(path)
     else:
         logger.error(f'Unsupported file format: {path.suffix}')
         raise ValueError
