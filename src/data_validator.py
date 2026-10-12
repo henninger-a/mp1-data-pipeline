@@ -26,7 +26,7 @@ def validate_dataframe(df, required_columns, numeric_columns):
                     float(value)
                 except ValueError:
                     invalid_rows.append(i)
-        logger.warning(f'Removed {len(invalid_rows)} row(s) from {col}')
+        logger.warning(f'Removed {len(invalid_rows)} row(s) from {col} with invalid numerical values')
 
         df = df.drop(index=invalid_rows)
         df[col] = pd.to_numeric(df[col])

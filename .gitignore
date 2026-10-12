@@ -12,5 +12,6 @@ __pycache__/
 Thumbs.db
 
 *.md
+!README.md
 .venv/
 output/
