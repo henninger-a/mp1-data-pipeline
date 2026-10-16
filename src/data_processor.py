@@ -56,7 +56,7 @@ def remove_outliers(df, columns, method, threshold):
             z_scores = []
             for num in df[column]:
                 z_scores.append((num - mean) / std)
-        df = df[pd.Series([abs(x) for x in z_scores]) <= 3]
+        df = df[pd.Series([abs(x) for x in z_scores]).to_numpy() <= 3]
     if method not in ['iqr', 'zscore']:
         logger.error(f'Unsupported outlier method: {method}')
         raise ValueError    
